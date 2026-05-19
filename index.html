@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mr. HKT Tournament</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        darkbg: '#0A0A12',
+                        cardbg: '#121222',
+                        accent: '#FF3366',
+                        accenthover: '#E62E5C',
+                        borderline: '#22223B',
+                        bkash: '#E2136E',
+                        nagad: '#F6921E'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        gaming: ['Orbitron', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #0A0A12; color: #F8FAFC; font-family: 'Inter', sans-serif; scrollbar-width: none; }
+        body::-webkit-scrollbar { display: none; }
+        .neon-text { text-shadow: 0 0 12px rgba(255, 51, 102, 0.5); }
+        .neon-shadow { box-shadow: 0 0 20px rgba(255, 51, 102, 0.2); }
+        .input-glow:focus { box-shadow: 0 0 12px rgba(255, 51, 102, 0.25); border-color: #FF3366; outline: none; }
+    </style>
+</head>
+<body class="min-h-screen relative pb-24">
+
+    <!-- ==================== GENERAL NOTICE MODAL ==================== -->
+    <div id="modal-general-notice" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+        <div class="w-full max-w-sm bg-cardbg border border-borderline rounded-2xl p-6 text-center shadow-2xl relative">
+            <div class="inline-flex items-center justify-center w-14 h-14 rounded-full bg-accent/10 border border-accent/30 text-accent mb-4">
+                <i class="fa-solid fa-bell text-2xl animate-bounce"></i>
+            </div>
+            <h3 class="font-gaming font-bold text-lg text-white mb-2 uppercase tracking-wide">General Notice Board</h3>
+            <p id="app-general-notice-content" class="text-xs text-slate-300 leading-relaxed mb-6 whitespace-pre-wrap text-left bg-darkbg p-4 rounded-xl border border-borderline">
+                Loading official announcement updates...
+            </p>
+            <button onclick="closeGeneralNoticeModal()" class="w-full bg-accent hover:bg-accenthover text-white text-xs font-bold uppercase tracking-wider py-3 rounded-xl transition neon-shadow">
+                Dismiss Notice
+            </button>
+        </div>
+    </div>
+
+    <!-- ==================== ACCESS DENIED PREVIEW MODAL ==================== -->
+    <div id="modal-preview-restricted" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+        <div class="w-full max-w-sm bg-cardbg border border-borderline rounded-2xl p-6 text-center shadow-2xl relative">
+            <div class="inline-flex items-center justify-center w-14 h-14 rounded-full bg-accent/10 border border-accent/30 text-accent mb-4">
+                <i class="fa-solid fa-lock text-2xl"></i>
+            </div>
+            <h3 class="font-gaming font-bold text-lg text-white mb-2 uppercase tracking-wide">Access Denied!</h3>
+            <p class="text-xs text-slate-400 leading-relaxed mb-6">
+                Please register or sign in to your Mr. HKT account to unlock match registration and wallet privileges.
+            </p>
+            <div class="flex flex-col gap-2">
+                <button onclick="exitPreviewToAuth()" class="w-full bg-accent hover:bg-accenthover text-white text-xs font-bold uppercase tracking-wider py-3 rounded-xl transition neon-shadow">
+                    Go to Authentication
+                </button>
+                <button onclick="closeRestrictionModal()" class="w-full bg-darkbg border border-borderline text-slate-400 hover:text-white text-xs font-bold uppercase tracking-wider py-3 rounded-xl transition">
+                    Continue Browsing
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== TOURNAMENT JOINING UID PROMPT MODAL ==================== -->
+    <div id="modal-join-uid" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+        <div class="w-full max-w-sm bg-cardbg border border-borderline rounded-2xl p-6 shadow-2xl relative">
+            <div class="text-center mb-4">
+                <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 mb-2">
+                    <i class="fa-solid fa-gamepad text-xl"></i>
+                </div>
+                <h3 class="font-gaming font-bold text-base text-white uppercase tracking-wide">Confirm Entry Registration</h3>
+            </div>
+            <div class="mb-4">
+                <label class="block text-xs font-semibold text-slate-300 mb-2 text-center text-amber-400">যে UID দিয়ে একাউন্ট খোলা হয়েছে সেটা দাও</label>
+                <input type="text" id="input-join-ffuid" placeholder="Enter Free Fire Numeric UID" class="w-full bg-darkbg border border-borderline rounded-xl px-4 py-3 text-sm input-glow text-white text-center font-bold tracking-widest">
+            </div>
+            <div class="flex gap-2">
+                <button onclick="closeJoinUidModal()" class="flex-1 bg-darkbg border border-borderline text-slate-400 hover:text-white text-xs font-bold uppercase py-3 rounded-xl transition">
+                    Cancel
+                </button>
+                <button onclick="confirmMatchRegistrationWithUid()" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold uppercase py-3 rounded-xl transition shadow-lg shadow-emerald-600/20">
+                    Confirm Join
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== SCREEN 1: AUTHENTICATION INTERFACE ==================== -->
+    <div id="screen-auth" class="min-h-screen flex items-center justify-center p-4">
+        <div class="w-full max-w-md bg-cardbg rounded-3xl border border-borderline p-6 sm:p-8 shadow-2xl relative">
+            <div class="text-center mb-6">
+                <div class="inline-flex items-center justify-center w-14 h-14 rounded-full bg-darkbg border border-accent/40 neon-shadow mb-3">
+                    <i class="fa-solid fa-gamepad text-accent text-2xl"></i>
+                </div>
+                <h1 class="font-gaming font-black text-xl tracking-widest uppercase neon-text">Mr. HKT<br><span class="text-white text-xs tracking-wider">Tournament</span></h1>
+            </div>
+
+            <!-- Authentic Tab Toggle Selectors -->
+            <div class="flex mb-6 border-b border-borderline">
+                <button id="btn-tab-login" onclick="toggleAuthMode('login')" class="flex-1 pb-2 text-center font-bold text-xs uppercase tracking-wider text-accent border-b-2 border-accent transition-all">Login</button>
+                <button id="btn-tab-register" onclick="toggleAuthMode('register')" class="flex-1 pb-2 text-center font-bold text-xs uppercase tracking-wider text-slate-500 transition-all">Register</button>
+                <button id="btn-tab-preview" onclick="toggleAuthMode('preview')" class="flex-1 pb-2 text-center font-bold text-xs uppercase tracking-wider text-slate-500 transition-all">Preview</button>
+            </div>
+
+            <!-- Login Form -->
+            <div id="box-login" class="flex flex-col gap-4">
+                <form id="form-login" class="flex flex-col gap-4">
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-500"><i class="fa-solid fa-envelope"></i></span>
+                        <input type="email" id="login-email" placeholder="Email Address" class="w-full bg-darkbg border border-borderline rounded-xl pl-11 pr-4 py-3 text-sm input-glow text-white" required>
+                    </div>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-500"><i class="fa-solid fa-lock"></i></span>
+                        <input type="password" id="login-password" placeholder="Password" class="w-full bg-darkbg border border-borderline rounded-xl pl-11 pr-4 py-3 text-sm input-glow text-white" required>
+                    </div>
+                    <button type="submit" class="w-full bg-accent py-3 rounded-xl font-bold uppercase tracking-wider text-sm transition neon-shadow hover:bg-accenthover text-white">Sign In</button>
+                </form>
+                <div class="text-center mt-2">
+                    <button onclick="handleForgotPassword()" class="text-xs text-slate-400 hover:text-accent transition font-semibold underline decoration-dashed">Forgot Password?</button>
+                </div>
+            </div>
+
+            <!-- Registration Form -->
+            <form id="form-register" class="hidden flex flex-col gap-4">
+                <input type="text" id="reg-name" placeholder="Full Name" class="w-full bg-darkbg border border-borderline rounded-xl px-4 py-3 text-sm input-glow text-white" required>
+                <input type="text" id="reg-uid" placeholder="Free Fire UID (Numeric ID)" class="w-full bg-darkbg border border-borderline rounded-xl px-4 py-3 text-sm input-glow text-white" required>
+                <input type="tel" id="reg-phone" placeholder="Phone Number" class="w-full bg-darkbg border border-borderline rounded-xl px-4 py-3 text-sm input-glow text-white" required>
+                <input type="email" id="reg-email" placeholder="Email Address" class="w-full bg-darkbg border border-borderline rounded-xl px-4 py-3 text-sm input-glow text-white" required>
+                <input type="password" id="reg-password" placeholder="Password (Min 6 Characters)" class="w-full bg-darkbg border border-borderline rounded-xl px-4 py-3 text-sm input-glow text-white" required>
+                <button type="submit" class="w-full bg-accent py-3 rounded-xl font-bold uppercase tracking-wider text-sm transition neon-shadow hover:bg-accenthover text-white">Create Account</button>
+            </form>
+
+            <!-- Preview Tab Mode Pane -->
+            <div id="box-preview" class="hidden text-center flex-col gap-4">
+                <p class="text-xs text-slate-400 leading-relaxed mb-2">
+                    Want to explore before creating an account? Enter guest mode to view live tournaments and matchmaking updates instantly.
+                </p>
+                <button onclick="enterPreviewMode()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white py-3 rounded-xl font-bold uppercase tracking-wider text-sm transition shadow-lg shadow-emerald-600/20">
+                    Enter Guest View
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== SCREEN 2: MAIN MATCH FEED ==================== -->
+    <div id="screen-main" class="hidden max-w-md mx-auto px-4">
+        <!-- App Header Layout -->
+        <header class="flex justify-between items-center py-4 bg-darkbg/90 backdrop-blur sticky top-0 z-30 border-b border-borderline mb-4">
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-gamepad text-accent text-xl"></i>
+                <h1 class="font-gaming font-black text-sm uppercase tracking-wide">Mr. HKT</h1>
+            </div>
+            <div class="flex items-center gap-3">
+                <!-- Notice Icon -->
+                <button onclick="openGeneralNoticeModal()" class="text-slate-400 hover:text-accent transition relative p-2" title="Notifications">
+                    <i class="fa-solid fa-bell text-base"></i>
+                    <span class="absolute top-1 right-1 w-2 h-2 bg-accent rounded-full animate-ping"></span>
+                </button>
+                <div id="header-wallet-btn" onclick="navigateTo('wallet')" class="bg-cardbg border border-borderline px-3 py-1.5 rounded-full flex items-center gap-2 cursor-pointer hover:border-accent transition">
+                    <i class="fa-solid fa-wallet text-accent text-xs"></i>
+                    <span id="display-wallet-balance" class="font-bold text-xs text-slate-200">৳0.00</span>
+                </div>
+                <button onclick="logOutUser()" class="text-slate-400 hover:text-accent transition text-sm" title="Exit/Sign Out">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Dynamic Dashboard Notice Bar (Marquee Alert Box) -->
+        <div id="dashboard-notice-box" class="mb-4 bg-accent/10 border border-accent/20 rounded-xl px-4 py-2 overflow-hidden whitespace-nowrap text-xs text-accent font-semibold flex items-center gap-2">
+            <i class="fa-solid fa-bullhorn flex-shrink-0"></i>
+            <marquee id="notice-dashboard-text" behavior="scroll" direction="left" class="w-full">Loading important announcements and matching metrics update logs...</marquee>
+        </div>
+
+        <!-- Feature Banners Slider Area -->
+        <section class="mb-6">
+            <div class="w-full h-32 rounded-2xl bg-gradient-to-r from-accent to-[#A31D44] p-5 flex flex-col justify-end relative overflow-hidden neon-shadow">
+                <i class="fa-solid fa-crosshairs absolute -top-4 -right-4 text-8xl opacity-10 transform -rotate-12 text-white"></i>
+                <h2 class="font-gaming font-black text-base uppercase leading-tight text-white tracking-wide">Elite Tournaments</h2>
+                <p class="text-[11px] text-white/80 mt-0.5">Compete against champions, secure your kills, and claim bonuses.</p>
+            </div>
+        </section>
+
+        <!-- Filtering Tabs Title -->
+        <div class="mb-4 border-b border-borderline flex">
+            <span class="pb-2 border-b-2 border-accent text-accent font-bold text-xs uppercase tracking-wider">Active Match Streams</span>
+        </div>
+
+        <!-- Dynamic Destination Feed Node -->
+        <main id="match-cards-container" class="flex flex-col gap-4"></main>
+    </div>
+
+    <!-- ==================== SCREEN 3: WALLET MANAGEMENT MODULE ==================== -->
+    <div id="screen-wallet" class="hidden max-w-md mx-auto px-4 pt-4">
+        <div class="flex items-center gap-4 mb-6">
+            <button onclick="navigateTo('main')" class="w-9 h-9 rounded-xl bg-cardbg border border-borderline flex items-center justify-center text-slate-400 hover:text-white transition">
+                <i class="fa-solid fa-arrow-left text-xs"></i>
+            </button>
+            <h1 class="font-gaming font-bold text-base uppercase tracking-wide text-white">Accounting Center</h1>
+        </div>
+
+        <!-- Wallet Accounting Summaries Panel -->
+        <div class="bg-cardbg border border-borderline rounded-2xl p-4 flex flex-col gap-3.5 mb-6">
+            <div class="flex justify-between items-center">
+                <span class="text-xs font-medium text-slate-400">Play/Deposit Balance</span>
+                <span id="wallet-deposit-val" class="font-bold text-white text-sm">৳0.00</span>
+            </div>
+            <div class="h-px bg-borderline"></div>
+            <div class="flex justify-between items-center">
+                <span class="text-xs font-medium text-slate-400">Winning Ledger (Withdrawable)</span>
+                <span id="wallet-winning-val" class="font-bold text-emerald-400 text-sm">৳0.00</span>
+            </div>
+        </div>
+
+        <!-- Ledger Option Tabs Toggle Switches -->
+        <div class="grid grid-cols-2 gap-2 bg-cardbg p-1 rounded-xl border border-borderline mb-4 text-xs font-bold uppercase tracking-wider">
+            <button id="btn-subtab-dep" onclick="toggleWalletForm('deposit')" class="py-2.5 rounded-lg bg-accent text-white transition-all">Deposit Funds</button>
+            <button id="btn-subtab-with" onclick="toggleWalletForm('withdraw')" class="py-2.5 rounded-lg text-slate-400 transition-all">Withdraw Claims</button>
+        </div>
+
+        <!-- Deposit Action Form Sheet -->
+        <div id="box-deposit" class="bg-cardbg border border-borderline rounded-xl p-4 flex flex-col gap-4">
+            <!-- Deposit Notice Field Insertion -->
+            <div id="notice-deposit-box" class="bg-amber-500/10 border border-amber-500/20 text-amber-400 rounded-xl p-3 text-[11px] leading-relaxed font-medium hidden">
+                <p id="notice-deposit-text"></p>
+            </div>
+
+            <div>
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">1. Choose Gateway Network</label>
+                <div class="grid grid-cols-2 gap-2">
+                    <button id="deposit-gate-bkash" onclick="selectWalletGateway('deposit', 'bkash')" class="py-2.5 bg-darkbg border border-accent rounded-lg text-xs font-bold text-white flex justify-center items-center gap-1.5 transition">
+                        <span class="w-2 h-2 rounded-full bg-bkash"></span> bKash
+                    </button>
+                    <button id="deposit-gate-nagad" onclick="selectWalletGateway('deposit', 'nagad')" class="py-2.5 bg-darkbg border border-borderline rounded-lg text-xs font-bold text-slate-400 flex justify-center items-center gap-1.5 transition">
+                        <span class="w-2 h-2 rounded-full bg-nagad"></span> Nagad
+                    </button>
+                </div>
+            </div>
+            <div class="bg-darkbg p-3 border border-dashed border-borderline rounded-xl text-center">
+                <p class="text-[10px] uppercase font-bold text-slate-400 tracking-wide">Official Recipient Wallet Number</p>
+                <p class="text-sm font-gaming font-black text-accent mt-1 tracking-widest select-all">01336526346</p>
+                <span class="text-[9px] text-slate-500 block mt-1">(Send Money / Cash Out Only)</span>
+            </div>
+            <div class="flex flex-col gap-3">
+                <input type="number" id="input-dep-amount" placeholder="Deposit Amount (Min ৳20)" class="w-full bg-darkbg border border-borderline rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-accent">
+                <input type="text" id="input-dep-trxid" placeholder="Transaction Hash String (TrxID)" class="w-full bg-darkbg border border-borderline rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-accent uppercase">
+            </div>
+            <button onclick="submitDepositLog()" class="w-full bg-accent hover:bg-accenthover py-3 rounded-xl font-bold uppercase text-xs tracking-wider text-white transition neon-shadow">Submit Transaction Proof</button>
+        </div>
+
+        <!-- Withdrawal Action Claim Form Sheet -->
+        <div id="box-withdraw" class="hidden bg-cardbg border border-borderline rounded-xl p-4 flex flex-col gap-4">
+            <!-- Withdraw Notice Field Insertion -->
+            <div id="notice-withdraw-box" class="bg-amber-500/10 border border-amber-500/20 text-amber-400 rounded-xl p-3 text-[11px] leading-relaxed font-medium hidden">
+                <p id="notice-withdraw-text"></p>
+            </div>
+
+            <div>
+                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">1. Choose Settlement Gateway</label>
+                <div class="grid grid-cols-2 gap-2">
+                    <button id="withdraw-gate-bkash" onclick="selectWalletGateway('withdraw', 'bkash')" class="py-2.5 bg-darkbg border border-accent rounded-lg text-xs font-bold text-white flex justify-center items-center gap-1.5 transition">
+                        bKash Recipient
+                    </button>
+                    <button id="withdraw-gate-nagad" onclick="selectWalletGateway('withdraw', 'nagad')" class="py-2.5 bg-darkbg border border-borderline rounded-lg text-xs font-bold text-slate-400 flex justify-center items-center gap-1.5 transition">
+                        Nagad Recipient
+                    </button>
+                </div>
+            </div>
+            <div class="flex flex-col gap-3">
+                <input type="number" id="input-with-amount" placeholder="Withdrawal Amount (Min ৳50)" class="w-full bg-darkbg border border-borderline rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-accent">
+                <input type="tel" id="input-with-phone" placeholder="Account Wallet Phone Number" class="w-full bg-darkbg border border-borderline rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-accent">
+            </div>
+            <button onclick="submitWithdrawalClaim()" class="w-full bg-accent hover:bg-accenthover py-3 rounded-xl font-bold uppercase text-xs tracking-wider text-white transition neon-shadow">Dispatch Payout Request</button>
+        </div>
+
+        <!-- History Records Stack Dynamic List -->
+        <div class="mt-6">
+            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Accounting Statement Logs</h3>
+            <div id="history-records-container" class="flex flex-col gap-2.5 mb-6"></div>
+        </div>
+    </div>
+
+    <!-- ==================== FIXED NAVIGATION FOOTER CONTROL ==================== -->
+    <footer id="app-nav-footer" class="hidden fixed bottom-0 left-0 w-full bg-[#0E0E1A]/95 border-t border-borderline p-3 z-40 backdrop-blur">
+        <div class="max-w-md mx-auto flex justify-around text-center text-[10px] font-bold uppercase tracking-wider text-slate-400">
+            <button onclick="navigateTo('main')" class="flex flex-col items-center gap-1.5 hover:text-accent transition">
+                <i class="fa-solid fa-crosshairs text-base"></i><span>Tournaments</span>
+            </button>
+            <button onclick="navigateTo('wallet')" class="flex flex-col items-center gap-1.5 hover:text-accent transition">
+                <i class="fa-solid fa-wallet text-base"></i><span>Wallet Desk</span>
+            </button>
+        </div>
+    </footer>
+
+    <!-- ==================== ENGINE BACKEND JAVASCRIPT LOGIC ==================== -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getFirestore, doc, setDoc, collection, query, where, onSnapshot, runTransaction, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // Accurate Firebase Environment Configurations Profile
+        const firebaseConfig = {
+            apiKey: "AIzaSyD3TBFpNprregew2VyV6dXOEwuJN970zRo",
+            authDomain: "mr-hkt-tournament1.firebaseapp.com",
+            projectId: "mr-hkt-tournament1",
+            storageBucket: "mr-hkt-tournament1.firebasestorage.app",
+            messagingSenderId: "338211432145",
+            appId: "1:338211432145:android:6bee8f4f429bb41e1207f0"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let currentUserProfile = null;
+        let isPreviewMode = false;
+        let selectedDepGateway = "bkash";
+        let selectedWithGateway = "bkash";
+        
+        let activeJoinMatchId = null;
+        let activeJoinMatchFee = 0;
+
+        // Global Application Real-time Context State Synchronizations
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                isPreviewMode = false;
+                onSnapshot(doc(db, "users", user.uid), (profileDoc) => {
+                    if (profileDoc.exists()) {
+                        currentUserProfile = profileDoc.data();
+                        currentUserProfile.uid = user.uid;
+                        
+                        const totalBal = (currentUserProfile.wallet_balance || 0) + (currentUserProfile.winning_balance || 0);
+                        document.getElementById('display-wallet-balance').innerText = `৳${totalBal.toFixed(2)}`;
+                        document.getElementById('wallet-deposit-val').innerText = `৳${(currentUserProfile.wallet_balance || 0).toFixed(2)}`;
+                        document.getElementById('wallet-winning-val').innerText = `৳${(currentUserProfile.winning_balance || 0).toFixed(2)}`;
+                    }
+                });
+                initMatchFeedEngine();
+                initTransactionHistoryStream(user.uid);
+                initNoticeBoardEngine();
+                navigateTo('main');
+            } else {
+                if (!isPreviewMode) {
+                    currentUserProfile = null;
+                    navigateTo('auth');
+                }
+            }
+        });
+
+        // 4-Zone Notice Board Setup Realtime Streaming
+        function initNoticeBoardEngine() {
+            onSnapshot(doc(db, "settings", "notices"), (noticeDoc) => {
+                if (noticeDoc.exists()) {
+                    const data = noticeDoc.data();
+                    
+                    // 1. Dashboard Scrolling Marquee
+                    if (data.dashboard_notice) {
+                        document.getElementById('notice-dashboard-text').innerText = data.dashboard_notice;
+                    }
+                    
+                    // 2. Deposit Form Notice
+                    if (data.deposit_notice) {
+                        document.getElementById('notice-deposit-text').innerText = data.deposit_notice;
+                        document.getElementById('notice-deposit-box').classList.remove('hidden');
+                    } else {
+                        document.getElementById('notice-deposit-box').classList.add('hidden');
+                    }
+                    
+                    // 3. Withdraw Form Notice
+                    if (data.withdraw_notice) {
+                        document.getElementById('notice-withdraw-text').innerText = data.withdraw_notice;
+                        document.getElementById('notice-withdraw-box').classList.remove('hidden');
+                    } else {
+                        document.getElementById('notice-withdraw-box').classList.add('hidden');
+                    }
+                    
+                    // 4. General Notice Collection Storage
+                    if (data.general_notice) {
+                        document.getElementById('app-general-notice-content').innerText = data.general_notice;
+                    } else {
+                        document.getElementById('app-general-notice-content').innerText = "No news notifications posted.";
+                    }
+                }
+            });
+        }
+
+        // General Notice Interaction Controllers
+        window.openGeneralNoticeModal = function() {
+            document.getElementById('modal-general-notice').classList.remove('hidden');
+        };
+        window.closeGeneralNoticeModal = function() {
+            document.getElementById('modal-general-notice').classList.add('hidden');
+        };
+
+        // Forgot Password Implementation Route Pipeline
+        window.handleForgotPassword = async function() {
+            const typedEmail = document.getElementById('login-email').value.trim();
+            const emailPrompt = prompt("Enter your registered email address to receive recovery instructions:", typedEmail);
+            if (!emailPrompt) return;
+            
+            try {
+                await sendPasswordResetEmail(auth, emailPrompt.trim());
+                alert("Account Recovery Dispatched! Check your email inbox or spam folder instantly for your password reset configuration link.");
+            } catch (err) {
+                alert("Recovery Request Failed: " + err.message);
+            }
+        };
+
+        // Dynamic View Controller Router Routing Engine Logic
+        window.navigateTo = function(targetScreen) {
+            if (isPreviewMode && (targetScreen === 'wallet' || targetScreen === 'protected_action')) {
+                openRestrictionModal();
+                return;
+            }
+
+            document.getElementById('screen-auth').classList.add('hidden');
+            document.getElementById('screen-main').classList.add('hidden');
+            document.getElementById('screen-wallet').classList.add('hidden');
+            
+            const navFooter = document.getElementById('app-nav-footer');
+
+            if (targetScreen === 'auth') {
+                document.getElementById('screen-auth').classList.remove('hidden');
+                navFooter.classList.add('hidden');
+            } else if (targetScreen === 'main') {
+                document.getElementById('screen-main').classList.remove('hidden');
+                if (isPreviewMode) {
+                    navFooter.classList.add('hidden');
+                } else {
+                    navFooter.classList.remove('hidden');
+                }
+            } else if (targetScreen === 'wallet') {
+                document.getElementById('screen-wallet').classList.remove('hidden');
+                navFooter.classList.remove('hidden');
+            }
+        };
+
+        // Modal Interactive Management Layers
+        window.openRestrictionModal = function() {
+            document.getElementById('modal-preview-restricted').classList.remove('hidden');
+        };
+
+        window.closeRestrictionModal = function() {
+            document.getElementById('modal-preview-restricted').classList.add('hidden');
+        };
+
+        window.exitPreviewToAuth = function() {
+            closeRestrictionModal();
+            isPreviewMode = false;
+            navigateTo('auth');
+        };
+
+        // Active State View Authentication Toggles
+        window.toggleAuthMode = function(mode) {
+            const tabs = ['login', 'register', 'preview'];
+            tabs.forEach(tab => {
+                const button = document.getElementById(`btn-tab-${tab}`);
+                if (tab === mode) {
+                    button.className = "flex-1 pb-2 text-center font-bold text-xs uppercase tracking-wider text-accent border-b-2 border-accent transition-all";
+                } else {
+                    button.className = "flex-1 pb-2 text-center font-bold text-xs uppercase tracking-wider text-slate-500 transition-all";
+                }
+            });
+
+            document.getElementById('box-login').classList.add('hidden');
+            document.getElementById('form-register').classList.add('hidden');
+            document.getElementById('box-preview').classList.add('hidden');
+
+            if (mode === 'login') {
+                document.getElementById('box-login').classList.remove('hidden');
+            } else if (mode === 'register') {
+                document.getElementById('form-register').classList.remove('hidden');
+            } else if (mode === 'preview') {
+                document.getElementById('box-preview').classList.remove('hidden');
+            }
+        };
+
+        // Entry Guest Preview Method Handler
+        window.enterPreviewMode = function() {
+            isPreviewMode = true;
+            currentUserProfile = null;
+            document.getElementById('display-wallet-balance').innerText = "GUEST VIEW";
+            initMatchFeedEngine();
+            initNoticeBoardEngine();
+            navigateTo('main');
+        };
+
+        // Account Registration Module Submissions Handler
+        document.getElementById('form-register').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('reg-email').value.trim();
+            const pass = document.getElementById('reg-password').value;
+            const name = document.getElementById('reg-name').value.trim();
+            const uidVal = document.getElementById('reg-uid').value.trim();
+            const phone = document.getElementById('reg-phone').value.trim();
+
+            if (pass.length < 6) {
+                alert("Password security baseline failure: Provide minimum 6 index length characters.");
+                return;
+            }
+
+            try {
+                const cred = await createUserWithEmailAndPassword(auth, email, pass);
+                await setDoc(doc(db, "users", cred.user.uid), {
+                    name: name,
+                    ff_uid: uidVal,
+                    phone: phone,
+                    email: email,
+                    wallet_balance: 0.00,
+                    winning_balance: 0.00,
+                    timestamp: new Date()
+                });
+                alert("Identity registration completed. Profile allocated.");
+            } catch (err) {
+                alert("Registration Pipeline Aborted: " + err.message);
+            }
+        });
+
+        // Sign In Authentication Module Submissions Handler
+        document.getElementById('form-login').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value.trim();
+            const pass = document.getElementById('login-password').value;
+            try {
+                await signInWithEmailAndPassword(auth, email, pass);
+            } catch (err) {
+                alert("Authentication Signature Denied: " + err.message);
+            }
+        });
+
+        // Identity Termination Process Route 
+        window.logOutUser = function() {
+            if (isPreviewMode) {
+                isPreviewMode = false;
+                navigateTo('auth');
+            } else {
+                if (confirm("Disconnect and terminate application workflow sessions?")) {
+                    signOut(auth);
+                }
+            }
+        };
+
+        // Dynamic Document List Realtime Query Streaming Engine for Active Match Entries
+        function initMatchFeedEngine() {
+            const container = document.getElementById('match-cards-container');
+            const q = query(collection(db, "matches"));
+            
+            onSnapshot(q, (snapshot) => {
+                container.innerHTML = "";
+                if (snapshot.empty) {
+                    container.innerHTML = `<div class="p-8 text-center border border-dashed border-borderline rounded-2xl text-slate-500 text-xs">No active tournaments listed inside database index.</div>`;
+                    return;
+                }
+                snapshot.forEach((matchDoc) => {
+                    const match = matchDoc.data();
+                    if(match.status === "settled") return;
+                    
+                    const id = matchDoc.id;
+                    const countJoined = match.joined_players ? match.joined_players.length : 0;
+                    const barFillPercent = Math.min((countJoined / (match.slots || 1)) * 100, 100);
+                    
+                    // Check if current user numeric UID or account profile string tracks inside matches
+                    const isUserJoined = currentUserProfile && match.joined_players && (match.joined_players.includes(currentUserProfile.ff_uid));
+
+                    let functionalButtonMarkup = "";
+                    if (isUserJoined) {
+                        functionalButtonMarkup = `
+                            <div class="bg-darkbg border border-dashed border-emerald-500/30 rounded-xl p-3 mb-2 text-center text-xs">
+                                <p class="text-[10px] uppercase font-bold text-emerald-400 tracking-widest mb-1">Credentials Access Keys Unlocked</p>
+                                <p class="text-slate-400">Room ID: <span class="text-white font-mono select-all font-bold">${match.room_id || 'Pending Allocation'}</span></p>
+                                <p class="text-slate-400 mt-0.5">Password: <span class="text-white font-mono select-all font-bold">${match.room_password || 'Pending Allocation'}</span></p>
+                            </div>
+                            <button class="w-full bg-emerald-700/40 text-emerald-400/60 font-bold text-xs py-3 rounded-xl tracking-wider uppercase cursor-not-allowed border border-emerald-500/20" disabled>Registered Successfully</button>
+                        `;
+                    } else if (countJoined >= match.slots) {
+                        functionalButtonMarkup = `<button class="w-full bg-slate-800 text-slate-500 font-bold text-xs py-3 rounded-xl tracking-wider uppercase cursor-not-allowed" disabled>Registration Filled</button>`;
+                    } else {
+                        functionalButtonMarkup = `<button onclick="attemptMatchRegistration('${id}', ${match.fee})" class="w-full bg-accent hover:bg-accenthover text-white font-gaming font-bold text-xs py-3 rounded-xl tracking-wider uppercase transition shadow-lg shadow-accent/20">Join Match</button>`;
+                    }
+
+                    const cardNode = `
+                        <article class="bg-cardbg rounded-2xl p-4 border border-borderline relative overflow-hidden">
+                            <div class="flex justify-between items-start mb-3.5">
+                                <div>
+                                    <h3 class="font-bold text-sm text-white font-gaming tracking-wide">${match.title}</h3>
+                                    <p class="text-[10px] text-slate-400 font-medium mt-1"><i class="fa-regular fa-clock mr-1 text-accent"></i>${match.time}</p>
+                                </div>
+                                <div class="flex flex-col gap-1 items-end">
+                                    <span class="bg-accent/10 border border-accent/20 text-accent text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded">${match.map}</span>
+                                    <span class="bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded">Mode: ${match.game_mode || 'Classic'}</span>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-3 gap-2 bg-darkbg p-2.5 rounded-xl border border-borderline/50 text-center text-xs mb-3.5">
+                                <div><p class="text-[9px] text-slate-400 font-semibold uppercase">Prize Pool</p><p class="font-bold text-accent mt-0.5">৳${match.prize}</p></div>
+                                <div><p class="text-[9px] text-slate-400 font-semibold uppercase">Per Kill</p><p class="font-bold text-white mt-0.5">৳${match.per_kill}</p></div>
+                                <div><p class="text-[9px] text-slate-400 font-semibold uppercase">Entry Fee</p><p class="font-bold text-emerald-400 mt-0.5">৳${match.fee}</p></div>
+                            </div>
+                            <div class="mb-4">
+                                <div class="flex justify-between text-[10px] font-bold mb-1">
+                                    <span class="text-slate-400">Slots Availability</span>
+                                    <span class="text-accent">${countJoined} / ${match.slots} Slots</span>
+                                </div>
+                                <div class="w-full bg-darkbg h-1.5 rounded-full overflow-hidden border border-borderline">
+                                    <div class="h-full bg-accent" style="width: ${barFillPercent}%"></div>
+                                </div>
+                            </div>
+                            ${functionalButtonMarkup}
+                        </article>
+                    `;
+                    container.innerHTML += cardNode;
+                });
+            });
+        }
+
+        // Open UID Prompt Modal Configuration Routing
+        window.attemptMatchRegistration = function(matchId, entryFee) {
+            if (isPreviewMode) {
+                openRestrictionModal();
+                return;
+            }
+            if (!currentUserProfile) return;
+            if ((currentUserProfile.wallet_balance || 0) < entryFee) {
+                alert("Financial Error: Balance allocation fault. Please replenish play account deposits.");
+                return;
+            }
+
+            activeJoinMatchId = matchId;
+            activeJoinMatchFee = entryFee;
+            document.getElementById('input-join-ffuid').value = currentUserProfile.ff_uid || "";
+            document.getElementById('modal-join-uid').classList.remove('hidden');
+        };
+
+        window.closeJoinUidModal = function() {
+            document.getElementById('modal-join-uid').classList.add('hidden');
+            activeJoinMatchId = null;
+            activeJoinMatchFee = 0;
+        };
+
+        // Secure Real-Time Verification Confirming Action Submission
+        window.confirmMatchRegistrationWithUid = async function() {
+            const enteredUid = document.getElementById('input-join-ffuid').value.trim();
+            if (!enteredUid) {
+                alert("Validation Fault: Please input a correct Free Fire UID profile to match registration keys.");
+                return;
+            }
+
+            const userRef = doc(db, "users", currentUserProfile.uid);
+            const matchRef = doc(db, "matches", activeJoinMatchId);
+
+            try {
+                await runTransaction(db, async (transaction) => {
+                    const secureUserDoc = await transaction.get(userRef);
+                    const secureMatchDoc = await transaction.get(matchRef);
+
+                    if (!secureUserDoc.exists() || !secureMatchDoc.exists()) {
+                        throw "Structural indexing tracking paths failure error.";
+                    }
+
+                    const uData = secureUserDoc.data();
+                    const mData = secureMatchDoc.data();
+
+                    if ((uData.wallet_balance || 0) < activeJoinMatchFee) throw "Insufficient funds inside registration balance records.";
+                    if (mData.joined_players && mData.joined_players.includes(enteredUid)) throw "Identity validation duplicate constraint: That game UID is already registered in this match.";
+                    if ((mData.joined_players ? mData.joined_players.length : 0) >= mData.slots) throw "Ecosystem instance error: Match completely filled.";
+
+                    const allocatedBalance = (uData.wallet_balance || 0) - activeJoinMatchFee;
+                    const playersListArray = [...(mData.joined_players || []), enteredUid];
+
+                    transaction.update(userRef, { wallet_balance: allocatedBalance });
+                    transaction.update(matchRef, { joined_players: playersListArray });
+                });
+                alert("Match entry access confirmed! Registered tracking configurations applied.");
+                closeJoinUidModal();
+            } catch (err) {
+                alert("Atomic Sequence Aborted Failure: " + err);
+            }
+        };
+
+        // Ledger Forms Toggles State Module Engine
+        window.toggleWalletForm = function(formType) {
+            const dBtn = document.getElementById('btn-subtab-dep');
+            const wBtn = document.getElementById('btn-subtab-with');
+            const dBox = document.getElementById('box-deposit');
+            const wBox = document.getElementById('box-withdraw');
+
+            if (formType === 'deposit') {
+                dBtn.className = "py-2.5 rounded-lg bg-accent text-white transition-all";
+                wBtn.className = "py-2.5 rounded-lg text-slate-400 transition-all";
+                dBox.classList.remove('hidden');
+                wBox.classList.add('hidden');
+            } else {
+                wBtn.className = "py-2.5 rounded-lg bg-accent text-white transition-all";
+                dBtn.className = "py-2.5 rounded-lg text-slate-400 transition-all";
+                wBox.classList.remove('hidden');
+                dBox.classList.add('hidden');
+            }
+        };
+
+        // CRITICAL FIX: Gateway Toggles Highlight System Verification Toggles
+        window.selectWalletGateway = function(section, provider) {
+            if (section === 'deposit') {
+                selectedDepGateway = provider;
+            } else {
+                selectedWithGateway = provider;
+            }
+
+            const targets = ['bkash', 'nagad'];
+            targets.forEach(t => {
+                const button = document.getElementById(`${section}-gate-${t}`);
+                if (t === provider) {
+                    button.className = "py-2.5 bg-darkbg border border-accent rounded-lg text-xs font-bold text-white flex justify-center items-center gap-1.5 transition";
+                } else {
+                    button.className = "py-2.5 bg-darkbg border border-borderline rounded-lg text-xs font-bold text-slate-400 flex justify-center items-center gap-1.5 transition";
+                }
+            });
+        };
+
+        // Document Form Operations Adding Deposit Document Verification Sheets
+        window.submitDepositLog = async function() {
+            const amount = parseFloat(document.getElementById('input-dep-amount').value);
+            const trxId = document.getElementById('input-dep-trxid').value.trim();
+
+            if (isNaN(amount) || amount < 20 || !trxId) {
+                alert("Validation Fault: Verify deposit bounds bounds (Min ৳20) and non-empty hash string values.");
+                return;
+            }
+
+            try {
+                await addDoc(collection(db, "transactions"), {
+                    uid: currentUserProfile.uid,
+                    name: currentUserProfile.name,
+                    phone: currentUserProfile.phone,
+                    type: "deposit",
+                    amount: amount,
+                    method: selectedDepGateway,
+                    transaction_id_field: trxId,
+                    status: "pending",
+                    timestamp: new Date()
+                });
+                alert("Deposit log proof sheet dispatched. Awaiting ledger authentication.");
+                document.getElementById('input-dep-amount').value = "";
+                document.getElementById('input-dep-trxid').value = "";
+            } catch (err) {
+                alert("Database operations failed: " + err.message);
+            }
+        };
+
+        // Document Form Operations Pushing Withdrawal Requests
+        window.submitWithdrawalClaim = async function() {
+            const amount = parseFloat(document.getElementById('input-with-amount').value);
+            const targetPhone = document.getElementById('input-with-phone').value.trim();
+
+            if (isNaN(amount) || amount < 50 || !targetPhone) {
+                alert("Validation Fault: Verify payout bounds constraints (Min ৳50) and parameter fields.");
+                return;
+            }
+            if ((currentUserProfile.winning_balance || 0) < amount) {
+                alert("Accounting Fault: Withdrawal limit parameters exceed winning balance ledger allocations.");
+                return;
+            }
+
+            try {
+                await addDoc(collection(db, "transactions"), {
+                    uid: currentUserProfile.uid,
+                    name: currentUserProfile.name,
+                    phone: targetPhone,
+                    type: "withdraw",
+                    amount: amount,
+                    method: selectedWithGateway,
+                    transaction_id_field: "Payout Request Form Log",
+                    status: "pending",
+                    timestamp: new Date()
+                });
+                alert("Withdrawal execution claim logged successfully into verification streams.");
+                document.getElementById('input-with-amount').value = "";
+                document.getElementById('input-with-phone').value = "";
+            } catch (err) {
+                alert("Database operations failed: " + err.message);
+            }
+        };
+
+        // Stream Query User-Specific History Document Arrays
+        function initTransactionHistoryStream(uid) {
+            const container = document.getElementById('history-records-container');
+            const q = query(collection(db, "transactions"), where("uid", "==", uid));
+            
+            onSnapshot(q, (snapshot) => {
+                container.innerHTML = "";
+                if (snapshot.empty) {
+                    container.innerHTML = `<p class="text-[10px] text-slate-500 font-medium text-center py-2">No historical accounts loaded.</p>`;
+                    return;
+                }
+                snapshot.forEach((doc) => {
+                    const data = doc.data();
+                    let badgeColorClass = "text-amber-400";
+                    if (data.status === 'success') badgeColorClass = "text-emerald-400";
+                    if (data.status === 'rejected') badgeColorClass = "text-rose-500";
+
+                    const markupNode = `
+                        <div class="flex justify-between items-center p-3 bg-darkbg border border-borderline rounded-xl text-xs">
+                            <div>
+                                <p class="font-bold capitalize">${data.type} Entry (${data.method.toUpperCase()})</p>
+                                <p class="text-[9px] text-slate-500 font-mono mt-0.5">${data.transaction_id_field}</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="font-bold ${data.type === 'deposit' ? 'text-emerald-400' : 'text-rose-400'}">${data.type === 'deposit' ? '+' : '-'}৳${data.amount.toFixed(2)}</p>
+                                <p class="text-[8px] uppercase tracking-wider font-extrabold ${badgeColorClass} mt-0.5">${data.status}</p>
+                            </div>
+                        </div>
+                    `;
+                    container.innerHTML += markupNode;
+                });
+            });
+        }
+    </script>
+</body>
+</html>
