@@ -4,20 +4,23 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mr. HKT Esports - Player Gateway</title>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Orbitron:wght@600;700;800;900&display=swap" rel="stylesheet">
     
+    <link rel="stylesheet" href="style.css">
+
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        darkbg: '#0A0A12',
-                        cardbg: '#121222',
+                        darkbg: '#07070e',
+                        cardbg: '#101120',
                         accent: '#FF3366',
                         accenthover: '#E62E5C',
-                        borderline: '#22223B',
+                        borderline: '#1f223d',
                         bkash: '#E2136E',
                         nagad: '#F6921E'
                     },
@@ -29,698 +32,153 @@
             }
         }
     </script>
-    <style>
-        body { 
-            background-color: #0A0A12; 
-            color: #F8FAFC; 
-            font-family: 'Inter', sans-serif; 
-            scrollbar-width: none; 
-        }
-        body::-webkit-scrollbar { display: none; }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        .neon-text { text-shadow: 0 0 12px rgba(255, 51, 102, 0.5); }
-        .neon-shadow { box-shadow: 0 0 20px rgba(255, 51, 102, 0.2); }
-        .nav-btn-active {
-            background: linear-gradient(135deg, #FF3366 0%, #C21A4B 100%);
-            color: #FFFFFF !important;
-            box-shadow: 0 4px 15px rgba(255, 51, 102, 0.3);
-            border-color: transparent;
-        }
-    </style>
 </head>
 <body class="min-h-screen flex flex-col max-w-md mx-auto relative border-x border-borderline shadow-2xl pb-24">
 
-    <div id="modal-global-notice-overlay" class="fixed inset-0 bg-black/80 z-[999] flex items-center justify-center p-6 hidden max-w-md mx-auto backdrop-blur-sm">
-        <div class="bg-cardbg border border-borderline w-full rounded-2xl p-5 flex flex-col gap-4 shadow-2xl">
-            <div class="flex items-center gap-3 border-b border-borderline pb-3 text-amber-400">
-                <i class="fa-solid fa-triangle-exclamation text-lg animate-pulse"></i>
-                <h3 class="font-gaming font-bold text-xs uppercase tracking-wider text-white">Tactical Broadcast Terminal</h3>
-            </div>
-            <p id="modal-notice-payload-container" class="text-xs font-medium text-slate-300 leading-relaxed max-h-60 overflow-y-auto no-scrollbar whitespace-pre-wrap">
-                Loading system transmissions...
-            </p>
-            <button onclick="dismissGlobalNoticeModalSystemWindow()" class="w-full bg-accent hover:bg-accenthover text-white font-bold text-xs py-3.5 rounded-xl uppercase tracking-widest transition neon-shadow">
-                Acknowledge Transmission
-            </button>
-        </div>
-    </div>
+    <div id="toast-container" class="flex flex-col gap-2"></div>
 
-    <div id="modal-preview-restricted" class="hidden fixed inset-0 z-[999] flex items-center justify-center p-6 bg-black/80 backdrop-blur-sm max-w-md mx-auto">
-        <div class="w-full bg-cardbg border border-borderline rounded-2xl p-6 text-center shadow-2xl relative">
-            <div class="inline-flex items-center justify-center w-14 h-14 rounded-full bg-accent/10 border border-accent/30 text-accent mb-4">
-                <i class="fa-solid fa-lock text-2xl"></i>
-            </div>
-            <h3 class="font-gaming font-bold text-base text-white mb-2 uppercase tracking-wide">Access Restricted!</h3>
-            <p class="text-xs text-slate-400 leading-relaxed mb-6">
-                ম্যাচে রেজিস্ট্রেশন করতে বা ওয়ালেট ব্যালেন্স দেখতে আপনার একাউন্টে সাইন ইন অথবা রেজিস্ট্রেশন করুন।
-            </p>
-            <div class="flex flex-col gap-2">
-                <button onclick="exitPreviewToAuth()" class="w-full bg-accent hover:bg-accenthover text-white text-xs font-bold uppercase tracking-wider py-3.5 rounded-xl transition neon-shadow">
-                    Go to Sign In / Register
-                </button>
-                <button onclick="closeRestrictionModal()" class="w-full bg-darkbg border border-borderline text-slate-400 hover:text-white text-xs font-bold uppercase tracking-wider py-3 rounded-xl transition">
-                    Continue Browsing
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <div id="modal-join-uid" class="hidden fixed inset-0 z-[999] flex items-center justify-center p-6 bg-black/80 backdrop-blur-sm max-w-md mx-auto">
-        <div class="w-full bg-cardbg border border-borderline rounded-2xl p-6 shadow-2xl relative">
-            <div class="text-center mb-4">
-                <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 mb-2">
-                    <i class="fa-solid fa-gamepad text-xl"></i>
-                </div>
-                <h3 class="font-gaming font-bold text-sm text-white uppercase tracking-wide">Confirm Entry Registration</h3>
-            </div>
-            <div class="mb-5">
-                <label class="block text-xs font-semibold text-amber-400 mb-2 text-center">যে Free Fire UID দিয়ে রেজিস্ট্রেশন করা হয়েছে সেটি যাচাই করুন:</label>
-                <input type="text" id="input-join-ffuid" placeholder="Enter Free Fire Numeric UID" class="w-full bg-darkbg border border-borderline rounded-xl px-4 py-3.5 text-xs text-white text-center font-bold tracking-widest focus:outline-none focus:border-accent">
-            </div>
-            <div class="flex gap-2">
-                <button onclick="closeJoinUidModal()" class="flex-1 bg-darkbg border border-borderline text-slate-400 hover:text-white text-xs font-bold uppercase py-3 rounded-xl transition">
-                    Cancel
-                </button>
-                <button onclick="confirmMatchRegistrationWithUid()" class="flex-1 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold uppercase py-3 rounded-xl transition shadow-lg shadow-emerald-600/20">
-                    Confirm Join
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <div id="auth-gate-screen" class="fixed inset-0 bg-darkbg z-[9999] flex flex-col p-6 max-w-md mx-auto border-x border-borderline overflow-y-auto no-scrollbar">
-        <div class="my-auto w-full flex flex-col gap-6 py-8">
+    <div id="auth-gate-screen" class="fixed inset-0 bg-darkbg z-[9999] flex flex-col p-6 max-w-md mx-auto border-x border-borderline overflow-y-auto">
+        <div class="my-auto w-full flex flex-col gap-6 py-6">
             
-            <div class="text-center">
-                <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-cardbg border border-accent/40 text-accent mb-3 shadow-lg shadow-accent/10">
-                    <i class="fa-solid fa-gamepad text-3xl animate-pulse"></i>
+            <div class="text-center relative">
+                <div class="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-cardbg border border-accent/40 text-accent mb-3 shadow-xl shadow-accent/10">
+                    <i class="fa-solid fa-gamepad text-4xl neon-text"></i>
                 </div>
-                <h1 class="font-gaming text-2xl font-black tracking-wider text-white neon-text">MR. HKT <span class="text-accent">ESPORTS</span></h1>
-                <p class="text-[10px] text-slate-400 mt-1 uppercase tracking-widest font-semibold">Authentication protocol required</p>
+                <h1 class="font-gaming text-2xl font-black tracking-wider text-white">MR. HKT <span class="text-accent">ESPORTS</span></h1>
+                <p class="text-[10px] text-slate-400 mt-1 uppercase font-mono">Player Authentication Protocol</p>
             </div>
 
-            <div class="flex border-b border-borderline text-xs font-bold uppercase tracking-wider">
-                <button id="btn-tab-login" onclick="toggleAuthMode('login')" class="flex-1 pb-3 text-center text-accent border-b-2 border-accent transition-all">Signin</button>
-                <button id="btn-tab-register" onclick="toggleAuthMode('register')" class="flex-1 pb-3 text-center text-slate-500 hover:text-slate-300 transition-all">Register</button>
-                <button id="btn-tab-preview" onclick="toggleAuthMode('preview')" class="flex-1 pb-3 text-center text-slate-500 hover:text-slate-300 transition-all"><i class="fa-solid fa-eye mr-1"></i> Preview</button>
+            <div class="flex border-b border-borderline text-xs font-bold uppercase tracking-wider bg-cardbg/40 p-1 rounded-xl">
+                <button id="btn-tab-login" onclick="toggleAuthMode('login')" class="flex-1 py-2.5 text-center text-accent border-b-2 border-accent transition-all rounded-lg">Signin</button>
+                <button id="btn-tab-register" onclick="toggleAuthMode('register')" class="flex-1 py-2.5 text-center text-slate-500 hover:text-slate-300 transition-all rounded-lg">Register</button>
+                <button id="btn-tab-preview" onclick="toggleAuthMode('preview')" class="flex-1 py-2.5 text-center text-slate-500 hover:text-slate-300 transition-all rounded-lg"><i class="fa-solid fa-eye mr-1"></i> Preview</button>
             </div>
 
             <div id="auth-subview-login" class="flex flex-col gap-4">
                 <form id="form-login-gate" onsubmit="handleAccountLoginProcessing(event)" class="flex flex-col gap-3.5 text-xs font-bold">
-                    <div class="relative">
-                        <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-500"><i class="fa-solid fa-envelope"></i></span>
-                        <input type="email" id="login-email-field" placeholder="ACCOUNT EMAIL ADDRESS" class="w-full bg-cardbg border border-borderline rounded-xl pl-11 pr-4 py-3.5 text-white placeholder-slate-500 focus:outline-none focus:border-accent transition" required>
-                    </div>
+                    <input type="email" id="login-email-field" placeholder="ACCOUNT EMAIL ADDRESS" class="w-full bg-cardbg border border-borderline rounded-xl px-4 py-3.5 text-white placeholder-slate-500 focus:outline-none focus:border-accent transition" required>
                     
                     <div class="relative">
-                        <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-500"><i class="fa-solid fa-lock"></i></span>
-                        <input type="password" id="login-pass-field" placeholder="SECRET SECURITY PASSKEY" class="w-full bg-cardbg border border-borderline rounded-xl pl-11 pr-11 py-3.5 text-white placeholder-slate-500 focus:outline-none focus:border-accent transition" required>
-                        <button type="button" onclick="togglePasswordVisibility('login-pass-field', 'login-eye-icon')" class="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-500 hover:text-white transition">
+                        <input type="password" id="login-pass-field" placeholder="SECRET PASSKEY" class="w-full bg-cardbg border border-borderline rounded-xl pl-4 pr-11 py-3.5 text-white placeholder-slate-500 focus:outline-none focus:border-accent transition" required>
+                        <button type="button" onclick="togglePasswordVisibility('login-pass-field', 'login-eye-icon')" class="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-500">
                             <i id="login-eye-icon" class="fa-solid fa-eye"></i>
                         </button>
                     </div>
 
-                    <div class="text-right">
-                        <button type="button" onclick="handleForgotPasswordReset()" class="text-[11px] text-slate-400 hover:text-accent font-semibold transition underline decoration-dashed">Forgot Password?</button>
-                    </div>
-
-                    <button type="submit" id="btn-login-submit" class="w-full bg-accent text-white py-4 rounded-xl uppercase tracking-wider text-xs font-black transition duration-200 hover:bg-accenthover neon-shadow mt-1">
-                        Secure Authentication Signin
+                    <button type="submit" id="btn-login-submit" class="w-full bg-accent text-white py-4 rounded-xl uppercase tracking-wider text-xs font-black hover:bg-accenthover transition neon-pink-glow">
+                        Sign In Profile
                     </button>
                 </form>
-
-                <p class="text-center text-[11px] text-slate-400 font-medium">
-                    New recruit profile creation needed? <button onclick="toggleAuthMode('register')" class="text-accent font-bold hover:underline">Register Identity</button>
-                </p>
             </div>
 
             <div id="auth-subview-register" class="flex flex-col gap-4 hidden">
                 <form id="form-register-gate" onsubmit="handleAccountRegistrationProcessing(event)" class="flex flex-col gap-3 text-xs font-bold">
-                    <div class="relative">
-                        <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-500"><i class="fa-solid fa-user"></i></span>
-                        <input type="text" id="reg-name-field" placeholder="SOLO SOLDIER CALLSIGN (NAME)" class="w-full bg-cardbg border border-borderline rounded-xl pl-11 pr-4 py-3.5 text-white placeholder-slate-500 focus:outline-none focus:border-accent transition" required>
-                    </div>
+                    <input type="text" id="reg-name-field" placeholder="SOLDIER NAME" class="w-full bg-cardbg border border-borderline rounded-xl px-4 py-3.5 text-white focus:outline-none focus:border-accent" required>
+                    <input type="email" id="reg-email-field" placeholder="EMAIL ADDRESS" class="w-full bg-cardbg border border-borderline rounded-xl px-4 py-3.5 text-white focus:outline-none focus:border-accent" required>
+                    <input type="text" id="reg-ffuid-field" placeholder="FREE FIRE NUMERIC UID" class="w-full bg-cardbg border border-borderline rounded-xl px-4 py-3.5 text-white focus:outline-none focus:border-accent font-mono" required>
+                    <input type="password" id="reg-pass-field" placeholder="PASSWORD" class="w-full bg-cardbg border border-borderline rounded-xl px-4 py-3.5 text-white focus:outline-none focus:border-accent" required>
 
-                    <div class="relative">
-                        <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-500"><i class="fa-solid fa-envelope"></i></span>
-                        <input type="email" id="reg-email-field" placeholder="EMAIL ADDRESS MATRIX" class="w-full bg-cardbg border border-borderline rounded-xl pl-11 pr-4 py-3.5 text-white placeholder-slate-500 focus:outline-none focus:border-accent transition" required>
-                    </div>
-
-                    <div class="relative">
-                        <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-500"><i class="fa-solid fa-gamepad"></i></span>
-                        <input type="text" id="reg-ffuid-field" placeholder="FREE FIRE DIGITAL UID KEY" class="w-full bg-cardbg border border-borderline rounded-xl pl-11 pr-4 py-3.5 text-white placeholder-slate-500 focus:outline-none focus:border-accent transition" required>
-                    </div>
-
-                    <div class="relative">
-                        <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-500"><i class="fa-solid fa-lock"></i></span>
-                        <input type="password" id="reg-pass-field" placeholder="NEW ENCRYPTED PASSWORD MASK" class="w-full bg-cardbg border border-borderline rounded-xl pl-11 pr-11 py-3.5 text-white placeholder-slate-500 focus:outline-none focus:border-accent transition" required>
-                        <button type="button" onclick="togglePasswordVisibility('reg-pass-field', 'reg-eye-icon')" class="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-500 hover:text-white transition">
-                            <i id="reg-eye-icon" class="fa-solid fa-eye"></i>
-                        </button>
-                    </div>
-
-                    <button type="submit" id="btn-register-submit" class="w-full bg-accent text-white py-4 rounded-xl uppercase tracking-wider text-xs font-black transition duration-200 hover:bg-accenthover neon-shadow mt-2">
-                        Forge Permanent Identity
+                    <button type="submit" id="btn-register-submit" class="w-full bg-accent text-white py-4 rounded-xl uppercase tracking-wider text-xs font-black hover:bg-accenthover transition neon-pink-glow mt-1">
+                        Register Account
                     </button>
                 </form>
-
-                <p class="text-center text-[11px] text-slate-400 font-medium">
-                    Already registered within tactical grid? <button onclick="toggleAuthMode('login')" class="text-accent font-bold hover:underline">Initialize Login</button>
-                </p>
             </div>
 
         </div>
     </div>
 
     <header class="bg-cardbg/80 backdrop-blur-md border-b border-borderline p-4 sticky top-0 z-40 flex items-center justify-between">
-        <div class="flex items-center gap-2">
-            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
-            <h1 class="font-gaming font-black text-sm tracking-wider text-white">MR. HKT <span class="text-accent">ESPORTS</span></h1>
+        <div class="flex items-center gap-2.5">
+            <span class="relative flex h-2.5 w-2.5">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+            </span>
+            <h1 class="font-gaming font-black text-xs tracking-wider text-white">MR. HKT <span class="text-accent">ESPORTS</span></h1>
         </div>
-        <div id="user-wallet-badge" onclick="switchNavigationTabPanelContext('panel-wallet')" class="bg-darkbg border border-borderline px-3.5 py-1.5 rounded-full flex items-center gap-2 text-xs font-bold cursor-pointer hover:border-accent/50 transition">
+        <div id="user-wallet-badge" onclick="switchNavigationTabPanelContext('panel-wallet')" class="bg-darkbg/90 border border-borderline px-3.5 py-1.5 rounded-full flex items-center gap-2 text-xs font-bold cursor-pointer">
             <i class="fa-solid fa-wallet text-accent"></i>
-            <span>৳<span id="header-balance">0.00</span></span>
+            <span class="font-mono">৳<span id="header-balance">0.00</span></span>
         </div>
     </header>
 
     <div class="bg-accent/10 border-b border-borderline py-2 px-4 flex items-center gap-2 text-xs font-semibold text-accent">
-        <i class="fa-solid fa-bullhorn text-xs animate-bounce shrink-0"></i>
-        <marquee id="dashboard-marquee-node" class="text-slate-300" scrollamount="4">Welcome to Mr. HKT Esports Platform! Check active tournaments and battle for prizes.</marquee>
+        <i class="fa-solid fa-bullhorn text-xs shrink-0"></i>
+        <marquee id="dashboard-marquee-node" class="text-slate-300 font-medium" scrollamount="4">Welcome to Mr. HKT Esports Gateway.</marquee>
     </div>
 
     <main class="p-4 flex-grow">
-        
         <section id="panel-home" class="app-panel-view flex flex-col gap-4">
-            <div class="flex items-center justify-between">
-                <h2 class="font-gaming text-xs font-bold tracking-wider uppercase text-slate-400 flex items-center gap-2">
-                    <i class="fa-solid fa-fire text-accent"></i> Active Battlegrounds
-                </h2>
-                <span class="text-[10px] bg-cardbg border border-borderline px-2 py-0.5 rounded font-bold text-slate-400">Live Sync</span>
-            </div>
-
             <div id="matches-list-container" class="flex flex-col gap-4">
-                <div class="text-center py-12 text-slate-500 text-xs font-bold flex flex-col items-center justify-center gap-3">
-                    <i class="fa-solid fa-circle-notch animate-spin text-accent text-lg"></i>
-                    <span>Scanning battleground for active deployments...</span>
+                <div class="text-center py-16 text-slate-500 text-xs font-bold">
+                    <i class="fa-solid fa-circle-notch animate-spin text-accent text-2xl mb-2"></i>
+                    <p>Loading Tournaments...</p>
                 </div>
             </div>
         </section>
 
         <section id="panel-wallet" class="app-panel-view hidden flex flex-col gap-4">
             <div class="grid grid-cols-2 gap-3 text-center">
-                <div class="bg-cardbg border border-borderline p-4 rounded-xl flex flex-col">
+                <div class="bg-cardbg border border-borderline p-4 rounded-2xl glass-panel">
                     <span class="text-[10px] uppercase font-bold text-slate-400">Deposit Balance</span>
-                    <span class="font-gaming text-lg font-black text-white mt-1">৳<span id="wallet-deposit-balance">0.00</span></span>
+                    <span class="font-gaming text-xl font-black text-white mt-1 block">৳<span id="wallet-deposit-balance">0.00</span></span>
                 </div>
-                <div class="bg-cardbg border border-borderline p-4 rounded-xl flex flex-col">
+                <div class="bg-cardbg border border-borderline p-4 rounded-2xl glass-panel">
                     <span class="text-[10px] uppercase font-bold text-slate-400">Winning Ledger</span>
-                    <span class="font-gaming text-lg font-black text-accent mt-1">৳<span id="wallet-winning-balance">0.00</span></span>
+                    <span class="font-gaming text-xl font-black text-accent mt-1 block">৳<span id="wallet-winning-balance">0.00</span></span>
                 </div>
             </div>
 
             <div class="grid grid-cols-2 gap-3">
-                <button onclick="openWalletTransactionForm('deposit')" class="bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 p-3.5 rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-emerald-600 hover:text-white transition">Add Money</button>
-                <button onclick="openWalletTransactionForm('withdraw')" class="bg-rose-600/20 text-rose-400 border border-rose-500/30 p-3.5 rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-rose-600 hover:text-white transition">Withdraw</button>
+                <button onclick="openWalletTransactionForm('deposit')" class="bg-emerald-600/15 text-emerald-400 border border-emerald-500/30 p-3.5 rounded-xl font-bold text-xs uppercase">Add Money</button>
+                <button onclick="openWalletTransactionForm('withdraw')" class="bg-rose-600/15 text-rose-400 border border-rose-500/30 p-3.5 rounded-xl font-bold text-xs uppercase">Withdraw</button>
             </div>
 
-            <div id="wallet-subview-form" class="bg-cardbg border border-borderline rounded-xl p-4 hidden flex flex-col gap-3.5 text-xs font-semibold">
-                <h3 id="form-tx-title" class="font-bold uppercase tracking-wider text-white">Initiate Request</h3>
-                <div id="wallet-notice-box" class="bg-darkbg p-3 rounded-xl border border-borderline text-[11px] text-amber-400 leading-relaxed whitespace-pre-wrap"></div>
-                
+            <div id="wallet-subview-form" class="bg-cardbg border border-borderline rounded-2xl p-4 hidden flex flex-col gap-3 text-xs font-semibold">
+                <h3 id="form-tx-title" class="font-gaming font-bold uppercase text-white">Initiate Request</h3>
                 <div class="flex gap-2">
-                    <button type="button" onclick="selectPaymentChannel('bkash')" id="btn-pay-bkash" class="flex-1 border border-borderline bg-darkbg p-3 rounded-xl flex items-center justify-center gap-2 font-bold text-xs transition">bKash</button>
-                    <button type="button" onclick="selectPaymentChannel('nagad')" id="btn-pay-nagad" class="flex-1 border border-borderline bg-darkbg p-3 rounded-xl flex items-center justify-center gap-2 font-bold text-xs transition">Nagad</button>
+                    <button type="button" onclick="selectPaymentChannel('bkash')" id="btn-pay-bkash" class="flex-1 border border-borderline bg-darkbg p-3 rounded-xl font-bold text-xs">bKash</button>
+                    <button type="button" onclick="selectPaymentChannel('nagad')" id="btn-pay-nagad" class="flex-1 border border-borderline bg-darkbg p-3 rounded-xl font-bold text-xs">Nagad</button>
                 </div>
-
-                <div id="wallet-number-display-box" class="bg-darkbg border border-borderline p-3 rounded-xl hidden flex justify-between items-center text-xs">
-                    <span class="text-slate-400">Send Money Number:</span>
-                    <span id="gateway-target-number" class="font-bold text-accent select-all">----------</span>
-                </div>
-
-                <input type="number" id="tx-amount-input" placeholder="Enter Amount (৳)" class="w-full bg-darkbg border border-borderline rounded-xl p-3 text-white focus:outline-none focus:border-accent">
-                <input type="text" id="tx-phone-input" placeholder="Your Sender / Recipient Mobile Number" class="w-full bg-darkbg border border-borderline rounded-xl p-3 text-white focus:outline-none focus:border-accent">
-                <input type="text" id="tx-trxid-input" placeholder="TrxID (Transaction ID Key)" class="w-full bg-darkbg border border-borderline rounded-xl p-3 text-white focus:outline-none focus:border-accent">
-
-                <button onclick="submitWalletTransactionPayload()" class="w-full bg-emerald-600 text-white p-3.5 rounded-xl font-bold uppercase tracking-wider hover:bg-emerald-500 transition">Submit Request</button>
-            </div>
-
-            <div class="bg-cardbg border border-borderline p-4 rounded-xl flex flex-col gap-3">
-                <h3 class="text-xs font-bold uppercase tracking-wider text-slate-400">Transaction History Log</h3>
-                <div id="wallet-history-container" class="flex flex-col gap-2 max-h-60 overflow-y-auto no-scrollbar">
-                    <p class="text-[11px] text-slate-500 italic text-center py-2">No historical accounts loaded.</p>
-                </div>
+                <input type="number" id="tx-amount-input" placeholder="Enter Amount (৳)" class="w-full bg-darkbg border border-borderline rounded-xl p-3 text-white focus:outline-none">
+                <input type="text" id="tx-phone-input" placeholder="Your Mobile Number" class="w-full bg-darkbg border border-borderline rounded-xl p-3 text-white focus:outline-none">
+                <input type="text" id="tx-trxid-input" placeholder="TrxID (Transaction Key)" class="w-full bg-darkbg border border-borderline rounded-xl p-3 text-white focus:outline-none font-mono">
+                <button onclick="submitWalletTransactionPayload()" class="w-full bg-emerald-600 text-white p-3.5 rounded-xl font-bold uppercase">Submit Transaction</button>
             </div>
         </section>
 
         <section id="panel-profile" class="app-panel-view hidden flex flex-col gap-4">
-            <div class="bg-cardbg border border-borderline rounded-xl p-5 flex flex-col gap-4">
+            <div class="bg-cardbg border border-borderline rounded-2xl p-5 flex flex-col gap-4 glass-panel">
                 <div class="flex items-center gap-4 border-b border-borderline pb-4">
-                    <div class="w-14 h-14 rounded-2xl bg-accent/10 border border-accent/30 text-accent flex items-center justify-center text-2xl font-black">
+                    <div class="w-12 h-12 rounded-xl bg-accent/10 border border-accent/30 text-accent flex items-center justify-center text-xl font-bold">
                         <i class="fa-solid fa-user-ninja"></i>
                     </div>
                     <div>
-                        <h3 id="profile-meta-name" class="font-gaming text-base font-bold text-white">Soldier Name</h3>
+                        <h3 id="profile-meta-name" class="font-gaming text-sm font-bold text-white">Soldier Name</h3>
                         <p id="profile-meta-email" class="text-xs text-slate-400 font-mono">user@example.com</p>
                     </div>
                 </div>
-
-                <div class="flex flex-col gap-3 text-xs">
-                    <div>
-                        <label class="block text-slate-400 font-bold uppercase mb-1">Callsign Name</label>
-                        <input type="text" id="settings-input-name" class="w-full bg-darkbg border border-borderline rounded-xl p-3 text-white focus:outline-none focus:border-accent">
-                    </div>
-                    <div>
-                        <label class="block text-slate-400 font-bold uppercase mb-1">Free Fire Numeric UID</label>
-                        <input type="text" id="settings-input-uid" class="w-full bg-darkbg border border-borderline rounded-xl p-3 text-white focus:outline-none focus:border-accent">
-                    </div>
-                    <button onclick="saveUserProfileSettings()" class="w-full bg-accent text-white p-3.5 rounded-xl font-bold uppercase tracking-wider hover:bg-accenthover transition neon-shadow mt-1">
-                        Save Profile Settings
-                    </button>
-                </div>
+                <button onclick="handleUserSignOut()" class="w-full bg-rose-600/10 border border-rose-500/30 text-rose-400 p-3.5 rounded-xl font-bold text-xs uppercase">
+                    Sign Out Profile
+                </button>
             </div>
-
-            <button onclick="handleUserSignOut()" class="w-full bg-rose-600/10 border border-rose-500/30 text-rose-400 p-3.5 rounded-xl font-bold text-xs uppercase tracking-wider hover:bg-rose-600 hover:text-white transition flex items-center justify-center gap-2">
-                <i class="fa-solid fa-right-from-bracket"></i> Sign Out Profile
-            </button>
         </section>
-
     </main>
 
-    <nav class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-cardbg/95 backdrop-blur-md border-t border-borderline p-2 flex justify-around z-40">
-        <button onclick="switchNavigationTabPanelContext('panel-home')" id="nav-btn-home" class="nav-btn-active flex-1 py-2.5 rounded-xl flex flex-col items-center gap-1 text-[10px] font-bold uppercase tracking-wider transition">
+    <nav class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-cardbg/90 backdrop-blur-lg border-t border-borderline p-2 flex justify-around z-40">
+        <button onclick="switchNavigationTabPanelContext('panel-home')" id="nav-btn-home" class="nav-btn-active flex-1 py-2.5 rounded-xl flex flex-col items-center gap-1 text-[10px] font-bold uppercase">
             <i class="fa-solid fa-gamepad text-base"></i>
             <span>Matches</span>
         </button>
-        <button onclick="switchNavigationTabPanelContext('panel-wallet')" id="nav-btn-wallet" class="flex-1 py-2.5 rounded-xl flex flex-col items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 hover:text-white transition">
+        <button onclick="switchNavigationTabPanelContext('panel-wallet')" id="nav-btn-wallet" class="flex-1 py-2.5 rounded-xl flex flex-col items-center gap-1 text-[10px] font-bold uppercase text-slate-400">
             <i class="fa-solid fa-wallet text-base"></i>
             <span>Wallet</span>
         </button>
-        <button onclick="switchNavigationTabPanelContext('panel-profile')" id="nav-btn-profile" class="flex-1 py-2.5 rounded-xl flex flex-col items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 hover:text-white transition">
+        <button onclick="switchNavigationTabPanelContext('panel-profile')" id="nav-btn-profile" class="flex-1 py-2.5 rounded-xl flex flex-col items-center gap-1 text-[10px] font-bold uppercase text-slate-400">
             <i class="fa-solid fa-user-gear text-base"></i>
             <span>Profile</span>
         </button>
     </nav>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, query, where, onSnapshot, addDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-        // 🔥 আপনার ফায়ারবেস কনফিগারেশন কী (YOUR FIREBASE CONFIG)
-        const firebaseConfig ={
-            apiKey: "AIzaSyD3TBFpNprregew2VyV6dXOEwuJN970zRo",
-            authDomain: "mr-hkt-tournament1.firebaseapp.com",
-            projectId: "mr-hkt-tournament1",
-            storageBucket: "mr-hkt-tournament1.firebasestorage.app",
-            messagingSenderId: "338211432145",
-            appId: "1:338211432145:android:6bee8f4f429bb41e1207f0"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-        // গ্লোবাল ভ্যারিয়েবলস
-        let currentActiveUserSession = null;
-        let currentUserDocId = null;
-        let selectedMatchForJoin = null;
-        let activeTransactionType = "";
-        let selectedPaymentChannelMethod = "";
-        window.isGuestPreviewMode = false;
-
-        // ১. অথেনটিকেশন সাবভিউ ও মোড সুইচিং
-        window.toggleAuthMode = function(mode) {
-            const loginSub = document.getElementById('auth-subview-login');
-            const regSub = document.getElementById('auth-subview-register');
-            const tabLogin = document.getElementById('btn-tab-login');
-            const tabReg = document.getElementById('btn-tab-register');
-            const tabPreview = document.getElementById('btn-tab-preview');
-
-            if (mode === 'register') {
-                loginSub.classList.add('hidden');
-                regSub.classList.remove('hidden');
-                
-                tabReg.className = "flex-1 pb-3 text-center text-accent border-b-2 border-accent transition-all";
-                tabLogin.className = "flex-1 pb-3 text-center text-slate-500 hover:text-slate-300 transition-all";
-                tabPreview.className = "flex-1 pb-3 text-center text-slate-500 hover:text-slate-300 transition-all";
-            } else if (mode === 'preview') {
-                document.getElementById('auth-gate-screen').classList.add('hidden');
-                window.isGuestPreviewMode = true;
-            } else {
-                regSub.classList.add('hidden');
-                loginSub.classList.remove('hidden');
-
-                tabLogin.className = "flex-1 pb-3 text-center text-accent border-b-2 border-accent transition-all";
-                tabReg.className = "flex-1 pb-3 text-center text-slate-500 hover:text-slate-300 transition-all";
-                tabPreview.className = "flex-1 pb-3 text-center text-slate-500 hover:text-slate-300 transition-all";
-            }
-        };
-
-        // ২. পাসওয়ার্ড চোখের আইকন শো/হাইড লজিক
-        window.togglePasswordVisibility = function(inputId, eyeIconId) {
-            const input = document.getElementById(inputId);
-            const icon = document.getElementById(eyeIconId);
-            if (input.type === 'password') {
-                input.type = 'text';
-                icon.classList.remove('fa-eye');
-                icon.classList.add('fa-eye-slash');
-            } else {
-                input.type = 'password';
-                icon.classList.remove('fa-eye-slash');
-                icon.classList.add('fa-eye');
-            }
-        };
-
-        // ৩. ফরগট পাসওয়ার্ড লজিক
-        window.handleForgotPasswordReset = async function() {
-            const email = prompt("আপনার রেজিস্টার্ড ইমেইল অ্যাড্রেস লিখুন:");
-            if (!email) return;
-            try {
-                await sendPasswordResetEmail(auth, email.trim());
-                alert("আপনার ইমেইলে পাসওয়ার্ড রিসেট লিঙ্ক পাঠানো হয়েছে। ইমেইল চেক করুন।");
-            } catch(err) {
-                alert("ত্রুটি: " + err.message);
-            }
-        };
-
-        // ৪. নেভিগেশন প্যানেল সুইচিং
-        window.switchNavigationTabPanelContext = function(panelId) {
-            if (window.isGuestPreviewMode && (panelId === 'panel-wallet' || panelId === 'panel-profile')) {
-                document.getElementById('modal-preview-restricted').classList.remove('hidden');
-                return;
-            }
-
-            document.querySelectorAll('.app-panel-view').forEach(p => p.classList.add('hidden'));
-            document.getElementById(panelId).classList.remove('hidden');
-
-            const btnHome = document.getElementById('nav-btn-home');
-            const btnWallet = document.getElementById('nav-btn-wallet');
-            const btnProfile = document.getElementById('nav-btn-profile');
-
-            btnHome.className = "flex-1 py-2.5 rounded-xl flex flex-col items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 hover:text-white transition";
-            btnWallet.className = "flex-1 py-2.5 rounded-xl flex flex-col items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 hover:text-white transition";
-            btnProfile.className = "flex-1 py-2.5 rounded-xl flex flex-col items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-slate-400 hover:text-white transition";
-
-            if (panelId === 'panel-home') btnHome.className = "nav-btn-active flex-1 py-2.5 rounded-xl flex flex-col items-center gap-1 text-[10px] font-bold uppercase tracking-wider transition";
-            if (panelId === 'panel-wallet') btnWallet.className = "nav-btn-active flex-1 py-2.5 rounded-xl flex flex-col items-center gap-1 text-[10px] font-bold uppercase tracking-wider transition";
-            if (panelId === 'panel-profile') btnProfile.className = "nav-btn-active flex-1 py-2.5 rounded-xl flex flex-col items-center gap-1 text-[10px] font-bold uppercase tracking-wider transition";
-        };
-
-        // ৫. ফায়ারবেস সাইন ইন প্রসেসিং
-        window.handleAccountLoginProcessing = async function(e) {
-            e.preventDefault();
-            const email = document.getElementById('login-email-field').value.trim();
-            const pass = document.getElementById('login-pass-field').value;
-            const btn = document.getElementById('btn-login-submit');
-
-            btn.disabled = true;
-            btn.innerText = "Authenticating Access...";
-
-            try {
-                await signInWithEmailAndPassword(auth, email, pass);
-                document.getElementById('auth-gate-screen').classList.add('hidden');
-                window.isGuestPreviewMode = false;
-            } catch(err) {
-                alert("লগইন ব্যর্থ হয়েছে: " + err.message);
-            } finally {
-                btn.disabled = false;
-                btn.innerText = "Secure Authentication Signin";
-            }
-        };
-
-        // ৬. ফায়ারবেস রেজিস্ট্রেশন প্রসেসিং
-        window.handleAccountRegistrationProcessing = async function(e) {
-            e.preventDefault();
-            const name = document.getElementById('reg-name-field').value.trim();
-            const email = document.getElementById('reg-email-field').value.trim().toLowerCase();
-            const ffuid = document.getElementById('reg-ffuid-field').value.trim();
-            const pass = document.getElementById('reg-pass-field').value;
-            const btn = document.getElementById('btn-register-submit');
-
-            btn.disabled = true;
-            btn.innerText = "Creating Identity...";
-
-            try {
-                const cred = await createUserWithEmailAndPassword(auth, email, pass);
-                await setDoc(doc(db, "users", cred.user.uid), {
-                    name: name,
-                    email: email,
-                    ff_uid: ffuid,
-                    wallet_balance: 0,
-                    winning_balance: 0,
-                    is_banned: false,
-                    created_at: new Date()
-                });
-                document.getElementById('auth-gate-screen').classList.add('hidden');
-                window.isGuestPreviewMode = false;
-            } catch(err) {
-                alert("রেজিস্ট্রেশন ত্রুটি: " + err.message);
-            } finally {
-                btn.disabled = false;
-                btn.innerText = "Forge Permanent Identity";
-            }
-        };
-
-        // ৭. ফায়ারবেস লিসেনার (Auth Check & Ban System)
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                currentUserDocId = user.uid;
-                onSnapshot(doc(db, "users", user.uid), (docSnap) => {
-                    if (docSnap.exists()) {
-                        const data = docSnap.data();
-                        
-                        // ব্যান চেক (Security Check)
-                        if (data.is_banned) {
-                            alert("আপনার একাউন্টটি ব্যান করা হয়েছে!");
-                            signOut(auth);
-                            location.reload();
-                            return;
-                        }
-
-                        currentActiveUserSession = data;
-                        document.getElementById('header-balance').innerText = ((data.wallet_balance || 0) + (data.winning_balance || 0)).toFixed(2);
-                        document.getElementById('wallet-deposit-balance').innerText = (data.wallet_balance || 0).toFixed(2);
-                        document.getElementById('wallet-winning-balance').innerText = (data.winning_balance || 0).toFixed(2);
-
-                        document.getElementById('profile-meta-name').innerText = data.name || "Soldier";
-                        document.getElementById('profile-meta-email').innerText = data.email || user.email;
-                        document.getElementById('settings-input-name').value = data.name || "";
-                        document.getElementById('settings-input-uid').value = data.ff_uid || "";
-
-                        document.getElementById('auth-gate-screen').classList.add('hidden');
-                        listenToUserTransactionsHistory(user.uid);
-                    }
-                });
-            } else if (!window.isGuestPreviewMode) {
-                document.getElementById('auth-gate-screen').classList.remove('hidden');
-            }
-        });
-
-        // ৮. রিয়েলটাইম নোটিশ ও টুর্নামেন্ট ডাটা স্ট্রিম
-        onSnapshot(doc(db, "settings", "notices"), (docSnap) => {
-            if (docSnap.exists()) {
-                const data = docSnap.data();
-                if (data.app_marquee) document.getElementById('dashboard-marquee-node').innerText = data.app_marquee;
-                if (data.global_popup_notice) {
-                    document.getElementById('modal-notice-payload-container').innerText = data.global_popup_notice;
-                    document.getElementById('modal-global-notice-overlay').classList.remove('hidden');
-                }
-            }
-        });
-
-        // ৯. রিয়েলটাইম টুর্নামেন্ট লোডিং
-        onSnapshot(collection(db, "matches"), (snapshot) => {
-            const container = document.getElementById('matches-list-container');
-            container.innerHTML = "";
-            if (snapshot.empty) {
-                container.innerHTML = `<p class="text-xs text-slate-500 text-center py-8">কোন একটিভ টুর্নামেন্ট পাওয়া যায়নি।</p>`;
-                return;
-            }
-
-            snapshot.forEach((docItem) => {
-                const m = docItem.data();
-                const joinedList = m.joined_players || [];
-                const isJoined = currentActiveUserSession && joinedList.includes(currentActiveUserSession.ff_uid);
-
-                let roomDetails = "";
-                if (isJoined) {
-                    roomDetails = `
-                        <div class="mt-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-3 text-[11px] font-mono text-emerald-400 select-all">
-                            <p class="flex justify-between"><span>ROOM ID:</span> <span class="text-white font-bold">${m.room_id || "TBA"}</span></p>
-                            <p class="flex justify-between mt-1"><span>PASS:</span> <span class="text-white font-bold">${m.room_password || "TBA"}</span></p>
-                        </div>
-                    `;
-                }
-
-                const card = `
-                    <div class="bg-cardbg border border-borderline rounded-2xl p-4 flex flex-col gap-3 shadow-lg">
-                        <div class="flex justify-between items-start">
-                            <div>
-                                <h3 class="font-gaming font-bold text-sm text-white">${m.title}</h3>
-                                <p class="text-[10px] text-slate-400 mt-0.5">Map: ${m.map || 'Bermuda'} | Type: ${m.type || 'SOLO'}</p>
-                            </div>
-                            <span class="text-xs font-black text-accent bg-accent/10 px-2.5 py-1 rounded-lg border border-accent/20">৳${m.entry_fee || 0}</span>
-                        </div>
-
-                        <div class="grid grid-cols-3 gap-2 bg-darkbg p-2.5 rounded-xl border border-borderline/60 text-center text-[10px]">
-                            <div><p class="text-slate-500">PRIZE POOL</p><p class="font-bold text-emerald-400">৳${m.prize || 0}</p></div>
-                            <div><p class="text-slate-500">PER KILL</p><p class="font-bold text-amber-400">৳${m.per_kill || 0}</p></div>
-                            <div><p class="text-slate-500">SLOTS</p><p class="font-bold text-white">${joinedList.length}/${m.total_slots || 48}</p></div>
-                        </div>
-
-                        ${roomDetails}
-
-                        ${!isJoined ? `
-                            <button onclick="triggerMatchJoinFlow('${docItem.id}')" class="w-full bg-accent hover:bg-accenthover text-white py-3 rounded-xl font-bold uppercase text-xs tracking-wider transition neon-shadow mt-1">
-                                Join Tournament
-                            </button>
-                        ` : `
-                            <button disabled class="w-full bg-emerald-600/20 border border-emerald-500/40 text-emerald-400 py-3 rounded-xl font-bold uppercase text-xs tracking-wider cursor-default">
-                                <i class="fa-solid fa-circle-check mr-1"></i> Successfully Joined
-                            </button>
-                        `}
-                    </div>
-                `;
-                container.innerHTML += card;
-            });
-        });
-
-        // ১০. টুর্নামেন্টে জয়েনিং লজিক
-        window.triggerMatchJoinFlow = function(matchId) {
-            if (window.isGuestPreviewMode || !auth.currentUser) {
-                document.getElementById('modal-preview-restricted').classList.remove('hidden');
-                return;
-            }
-            selectedMatchForJoin = matchId;
-            document.getElementById('input-join-ffuid').value = currentActiveUserSession?.ff_uid || "";
-            document.getElementById('modal-join-uid').classList.remove('hidden');
-        };
-
-        window.confirmMatchRegistrationWithUid = async function() {
-            const uidInput = document.getElementById('input-join-ffuid').value.trim();
-            if (!uidInput || !selectedMatchForJoin) return alert("সঠিক Free Fire UID দিন!");
-
-            try {
-                const matchRef = doc(db, "matches", selectedMatchForJoin);
-                const matchSnap = await getDoc(matchRef);
-                const matchData = matchSnap.data();
-
-                if ((currentActiveUserSession.wallet_balance || 0) < matchData.entry_fee) {
-                    alert("আপনার ওয়ালেটে পর্যাপ্ত ডিপোজিট ব্যালেন্স নেই! টাকা যোগ করুন।");
-                    return;
-                }
-
-                // ফি কাটা ও প্লেয়ার লিস্টে যুক্ত করা
-                await updateDoc(doc(db, "users", currentUserDocId), {
-                    wallet_balance: currentActiveUserSession.wallet_balance - matchData.entry_fee
-                });
-
-                const updatedJoined = matchData.joined_players || [];
-                updatedJoined.push(uidInput);
-                await updateDoc(matchRef, { joined_players: updatedJoined });
-
-                alert("টুর্নামেন্টে সফলভাবে নাম লেখানো হয়েছে!");
-                document.getElementById('modal-join-uid').classList.add('hidden');
-            } catch(err) {
-                alert("ত্রুটি: " + err.message);
-            }
-        };
-
-        // ওয়ালেট পেপমেন্ট মেথড নির্বাচন ও সাবমিট
-        window.openWalletTransactionForm = function(type) {
-            activeTransactionType = type;
-            document.getElementById('wallet-subview-form').classList.remove('hidden');
-            document.getElementById('form-tx-title').innerText = type === 'deposit' ? 'Initiate Deposit' : 'Initiate Withdrawal';
-        };
-
-        window.selectPaymentChannel = function(method) {
-            selectedPaymentChannelMethod = method;
-            document.getElementById('btn-pay-bkash').className = method === 'bkash' ? 'flex-1 border border-bkash bg-bkash/20 text-white p-3 rounded-xl flex items-center justify-center font-bold text-xs' : 'flex-1 border border-borderline bg-darkbg p-3 rounded-xl flex items-center justify-center font-bold text-xs';
-            document.getElementById('btn-pay-nagad').className = method === 'nagad' ? 'flex-1 border border-nagad bg-nagad/20 text-white p-3 rounded-xl flex items-center justify-center font-bold text-xs' : 'flex-1 border border-borderline bg-darkbg p-3 rounded-xl flex items-center justify-center font-bold text-xs';
-        };
-
-        window.submitWalletTransactionPayload = async function() {
-            const amount = parseFloat(document.getElementById('tx-amount-input').value);
-            const phone = document.getElementById('tx-phone-input').value.trim();
-            const trxid = document.getElementById('tx-trxid-input').value.trim();
-
-            if (!amount || !phone || !selectedPaymentChannelMethod) return alert("সবগুলো তথ্য সঠিকভাবে পূরণ করুন!");
-
-            try {
-                await addDoc(collection(db, "transactions"), {
-                    uid: currentUserDocId,
-                    user_name: currentActiveUserSession.name,
-                    amount: amount,
-                    phone: phone,
-                    method: selectedPaymentChannelMethod,
-                    transaction_id_field: trxid || `WITHDRAW-${Date.now().toString().slice(-6)}`,
-                    type: activeTransactionType,
-                    status: "pending",
-                    timestamp: new Date()
-                });
-                alert("রিকোয়েস্ট জমা হয়েছে! এডমিন যাচাই করে এপ্রুভ করবেন।");
-                document.getElementById('wallet-subview-form').classList.add('hidden');
-            } catch(err) {
-                alert("ত্রুটি: " + err.message);
-            }
-        };
-
-        // হিস্ট্রি লিসেনার
-        function listenToUserTransactionsHistory(uid) {
-            const q = query(collection(db, "transactions"), where("uid", "==", uid));
-            onSnapshot(q, (snapshot) => {
-                const container = document.getElementById('wallet-history-container');
-                container.innerHTML = "";
-                if (snapshot.empty) {
-                    container.innerHTML = `<p class="text-[11px] text-slate-500 text-center py-2">কোন ট্রানজেকশন হিস্ট্রি নেই।</p>`;
-                    return;
-                }
-                snapshot.forEach((d) => {
-                    const data = d.data();
-                    let badgeColor = data.status === 'success' ? 'text-emerald-400' : (data.status === 'rejected' ? 'text-rose-500' : 'text-amber-400');
-                    container.innerHTML += `
-                        <div class="flex justify-between items-center p-3 bg-darkbg border border-borderline rounded-xl text-xs">
-                            <div>
-                                <p class="font-bold uppercase">${data.type} (${data.method})</p>
-                                <p class="text-[9px] text-slate-500 font-mono mt-0.5">${data.transaction_id_field}</p>
-                            </div>
-                            <div class="text-right">
-                                <p class="font-bold ${data.type === 'deposit' ? 'text-emerald-400' : 'text-rose-400'}">৳${data.amount}</p>
-                                <p class="text-[9px] uppercase font-bold ${badgeColor} mt-0.5">${data.status}</p>
-                            </div>
-                        </div>
-                    `;
-                });
-            });
-        }
-
-        // সেটিংস সেভ
-        window.saveUserProfileSettings = async function() {
-            const name = document.getElementById('settings-input-name').value.trim();
-            const uid = document.getElementById('settings-input-uid').value.trim();
-            if(!name || !uid || !currentUserDocId) return;
-
-            try {
-                await updateDoc(doc(db, "users", currentUserDocId), { name: name, ff_uid: uid });
-                alert("প্রোফাইল সেটিংস আপডেট সম্পন্ন হয়েছে!");
-            } catch (err) { alert(err.message); }
-        };
-
-        // সাইন আউট
-        window.handleUserSignOut = function() {
-            signOut(auth).then(() => location.reload());
-        };
-
-        // হেল্পার মোডাল ক্লোজার্স
-        window.closeRestrictionModal = () => document.getElementById('modal-preview-restricted').classList.add('hidden');
-        window.exitPreviewToAuth = () => {
-            document.getElementById('modal-preview-restricted').classList.add('hidden');
-            document.getElementById('auth-gate-screen').classList.remove('hidden');
-            window.toggleAuthMode('login');
-        };
-        window.closeJoinUidModal = () => document.getElementById('modal-join-uid').classList.add('hidden');
-        window.dismissGlobalNoticeModalSystemWindow = () => document.getElementById('modal-global-notice-overlay').classList.add('hidden');
-    </script>
+    <script type="module" src="script.js"></script>
 </body>
 </html>

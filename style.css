@@ -1,0 +1,103 @@
+/* ==========================================
+   🎮 MR. HKT ESPORTS - SYSTEM STYLESHEET
+   ========================================== */
+
+:root {
+    --bg-dark: #07070e;
+    --bg-card: #101120;
+    --accent-pink: #FF3366;
+    --accent-cyan: #00F0FF;
+    --accent-emerald: #10B981;
+    --border-color: rgba(255, 255, 255, 0.08);
+}
+
+body {
+    background-color: var(--bg-dark);
+    color: #F8FAFC;
+    font-family: 'Inter', sans-serif;
+    overflow-x: hidden;
+    scrollbar-width: none;
+    -webkit-tap-highlight-color: transparent;
+    position: relative;
+}
+
+body::-webkit-scrollbar { 
+    display: none; 
+}
+
+/* 💡 Ambient Screen Lighting Effect (ব্যাকগ্রাউন্ড স্ক্রিন লাইটিং) */
+body::before {
+    content: '';
+    position: fixed;
+    top: -10%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 320px;
+    height: 320px;
+    background: radial-gradient(circle, rgba(255, 51, 102, 0.18) 0%, rgba(0, 240, 255, 0.08) 50%, transparent 80%);
+    filter: blur(60px);
+    z-index: -1;
+    pointer-events: none;
+    animation: ambientPulse 8s ease-in-out infinite alternate;
+}
+
+@keyframes ambientPulse {
+    0% { opacity: 0.6; transform: translateX(-50%) scale(1); }
+    100% { opacity: 1; transform: translateX(-50%) scale(1.25); }
+}
+
+/* ✨ Glassmorphism Panels */
+.glass-panel {
+    background: rgba(16, 17, 32, 0.82);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--border-color);
+}
+
+/* 🔮 Glows & Shadows */
+.neon-pink-glow {
+    box-shadow: 0 0 20px rgba(255, 51, 102, 0.35);
+}
+
+.neon-text {
+    text-shadow: 0 0 10px rgba(255, 51, 102, 0.5);
+}
+
+/* 🎮 Dynamic Match Card Effects */
+.match-card {
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.match-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(255, 51, 102, 0.4);
+    box-shadow: 0 8px 25px -5px rgba(255, 51, 102, 0.2);
+}
+
+/* 🔔 Toast Notification Styles */
+#toast-container {
+    position: fixed;
+    top: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 99999;
+    width: 90%;
+    max-width: 380px;
+    pointer-events: none;
+}
+
+.toast-msg {
+    pointer-events: auto;
+    animation: toastIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes toastIn {
+    from { opacity: 0; transform: translateY(-12px) scale(0.95); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.nav-btn-active {
+    background: linear-gradient(135deg, #FF3366 0%, #C21A4B 100%);
+    color: #FFFFFF !important;
+    box-shadow: 0 4px 18px rgba(255, 51, 102, 0.4);
+}
